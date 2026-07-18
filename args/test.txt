@@ -1,0 +1,7 @@
+batch_size:32
+learning_rate:0.0001
+max_epoch:50
+cifar_path:./dataset/cifar-10
+checkpoint_path:./checkpoint/cifar-10
+preprocessed_data_path:./preprocessed_data/cifar-10
+model_name:test_CNN
