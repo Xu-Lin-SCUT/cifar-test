@@ -25,7 +25,7 @@ def parse_args():
 def show_args(args):
     print('==================================\n')
     for key,value in vars(args).items():
-        print(f'{key}:{value}\n')
+        print(f'{key}:{value}')
     print('==================================\n')
 
 def save_args(path,args):
