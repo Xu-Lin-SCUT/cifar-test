@@ -4,7 +4,25 @@ import settings
 import os
 import pickle
 import numpy as np
+from torch.utils.data import Dataset,DataLoader
+import torch
+import torchvision.transforms as transforms
 
+train_transform=transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.RandomCrop(32,padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], 
+                         std=[0.2023, 0.1994, 0.2010])
+])
+
+test_transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], 
+                         std=[0.2023, 0.1994, 0.2010])
+])
 
 def unpickle(file):
     with open(file, 'rb') as f:
@@ -54,6 +72,23 @@ def load_data():
 
     return train_df,test_df
 
+class Cifar10_Dataset(Dataset):
+    def __init__(self,df,transform=None):
+        super().__init__()
+        self.df=df
+        self.transform=transform
+    
+    def __len__(self):
+        return len(self.df)
+    
+    def __getitem__(self, idx):
+        img = self.df.iloc[idx]['images'].reshape(3, 32, 32).astype(np.uint8)
+        img = img.transpose(1, 2, 0)
+        label=int(self.df.iloc[idx]['labels'])
+        img = self.transform(img)
+        
+        return img, torch.tensor(label)
+
 def test():
     test_dict = unpickle('./dataset/cifar-10/data_batch_1')
     print(test_dict.keys())  
@@ -63,7 +98,21 @@ def test():
     print(len(test_dict[b'labels']))  # 输出：10000
 
 if __name__=='__main__':
-    train_df, test_df= load_data()
-    print(train_df.info())
-    print(test_df.head(2))
-    print(type(train_df['images'].iloc[0])) 
+
+    # 1. 加载数据
+    train_df, test_df = load_data()
+    print(f"训练集样本数: {len(train_df)}, 测试集样本数: {len(test_df)}")
+    
+    # 2. 封装成 Dataset
+    train_dataset = Cifar10_Dataset(train_df)
+    test_dataset = Cifar10_Dataset(test_df)
+
+    args=config.parse_args()
+    # 3. 封装成 DataLoader
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    
+    # 4. 取一个批次验证形状
+    for images, labels in train_loader:
+        print(f"批次图片形状: {images.shape}")   # 预期: torch.Size([32, 3, 32, 32])
+        print(f"批次标签形状: {labels.shape}")   # 预期: torch.Size([32])
+        break

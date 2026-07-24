@@ -4,8 +4,8 @@ import os
 def parse_args():
     parser=argparse.ArgumentParser(description="arguments")
     #hyperparameters
-    parser.add_argument('--batch_size',type=int,default=32)
-    parser.add_argument('--learning_rate',type=float,default=1e-4)
+    parser.add_argument('--batch_size',type=int,default=128)
+    parser.add_argument('--learning_rate',type=float,default=1e-3)
     parser.add_argument('--max_epoch',type=int,default=50)
     #paths  
     parser.add_argument('--cifar_path',type=str,default='./dataset/cifar-10')
